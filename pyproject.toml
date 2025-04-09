@@ -1,0 +1,10 @@
+[project]
+name = "sacrifice-fly-modeling"
+version = "0.1.0"
+description = "Estimate the probability that a runner is thrown out at home when runners are on 2nd and 3rd."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "polars>=1.26.0",
+    "pybaseball>=2.2.7",
+]

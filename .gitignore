@@ -1,0 +1,64 @@
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Pipenv / Poetry
+Pipfile.lock
+poetry.lock
+
+# pyenv
+.python-version
+
+# pytest
+.pytest_cache/
+.cache/
+
+# mypy / pylint
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# === VS CODE ===
+.vscode/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+
+# === DATA ANALYSIS EXTRAS (OPTIONAL) ===
+*.log
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.sav
+*.rdata
+*.rds
+*.feather
+*.parquet
+*.h5
+*.hdf5
+*.sqlite
+*.db
+
+# === ENVIRONMENT VARIABLES / SECRETS ===
+.env
+.env.*
+secrets.toml
+config.toml
