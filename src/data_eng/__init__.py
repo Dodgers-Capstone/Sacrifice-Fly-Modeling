@@ -1,1 +1,1 @@
-from game_state_filter import game_state_filter
+from .game_state_filter import game_state_filter
