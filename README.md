@@ -72,7 +72,7 @@ uv add <package_name>
 - [ ] Game State Filtering
 - [ ] Fielder Positioning
 - [ ] Fielder Throw Velocity and Accuracy
-- [ ] Runner Acceleration and Velocity
+- [x] Runner Acceleration and Velocity
 - [ ] Coordinates of Caught Ball
 - [ ] Fielder who Caught Ball
 - [ ] Field Normalization
