@@ -1,4 +1,5 @@
 from pybaseball import statcast_sprint_speed
+from pybaseball import statcast_running_splits
 from datetime import datetime
 import polars as pl
 
@@ -44,6 +45,49 @@ def runner_sprint_speed_data(year_start: int, year_today: int = None, min_sample
     year_data_lazy = pl.concat(year_data_dict.values())
     
     return year_data_lazy
+#%%
+def runner_time_split_data(year_start: int, year_today: int = None, min_samples: int = 50):
+    """
+    Download runner time split data, the time from home to first base at 5ft intervals,
+    for multiple years. Appends years into one dataframe and selects relevant columns.
+    Args:
+        year_start (int): The first year to retrieve data from
+        year_today (int, optional): The last year to retrieve data from, 
+            exclusive. Defaults to current year if None.
+        min_samples (int, optional): Minimum number of sprint opportunities 
+            required. Defaults to 50.
+    
+    Returns:
+        pl.LazyFrame: player_id, year, and split times from 0ft to 90ft.
+    """
+    # If year not specified, use current year
+    if year_today is None:
+        year_today = datetime.now().year
+
+    year_data_dict = dict()
+
+    # Download runner sprint data from a start year till the current year.
+    # Stop while loop before current year for better results
+    while year_start < year_today:
+        # Dictionary of pl.LazyFrame
+        year_data = pl.LazyFrame(statcast_running_splits(year_start, min_samples))
+        year_data = year_data.with_columns(pl.lit(year_start).alias("year"))
+        # year_data = year_data.select(
+        #     pl.col("player_id"),
+        #     pl.col("year"),
+        #     pl.col("sprint_speed")
+        # )
+        year_data_dict[year_start] = year_data
+        year_start += 1
+    
+    year_data_lazy = pl.LazyFrame()
+    
+    # Append each year to the bottom
+    year_data_lazy = pl.concat(year_data_dict.values())
+    
+    return year_data_lazy
+
+#%%
 
 def sprint_statcast_lazy_merge(statcast_data: pl.LazyFrame, sprint_data: pl.LazyFrame):
     """
@@ -57,16 +101,21 @@ def sprint_statcast_lazy_merge(statcast_data: pl.LazyFrame, sprint_data: pl.Lazy
         pl.LazyFrame: Merged sprint speed and Statcast data for runners on third base
     """
     # Add year column
-    statcast_data = statcast_data.with_columns(
-        pl.col("game_date").dt.year().alias("year")
+    statcast_data = (statcast_data.with_columns(
+        pl.col("game_date").dt.year().alias("year"),
     )
 
     # Merge by playerID and year
-    merged_lazy = statcast_data.join(
-        sprint_data,
-        left_on=["on_3b", "year"],
-        right_on=["player_id", "year"],
-        how="left"
+    merged_lazy = (statcast_data
+        .join(
+            sprint_data,
+            left_on=["on_3b", "year"],
+            right_on=["player_id", "year"],
+            how="left"
+        )
+        .with_columns(
+            pl.col("sprint_speed").alias("on_3b_max_velocity_ft/s")
+        )
     )
 
     return merged_lazy
