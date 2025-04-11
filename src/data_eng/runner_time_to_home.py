@@ -3,7 +3,7 @@ from pybaseball import statcast_running_splits
 from datetime import datetime
 import polars as pl
 
-def runner_sprint_speed_data(year_start: int, year_today: int = None, min_samples: int = 50):
+def runner_sprint_data(year_start: int, year_today: int = None, min_samples: int = 50):
     """
     Download runner sprint data from pybaseball for multiple years. Appends 
     years into one dataframe and selects relevant columns.
@@ -23,29 +23,40 @@ def runner_sprint_speed_data(year_start: int, year_today: int = None, min_sample
     if year_today is None:
         year_today = datetime.now().year
 
-    year_data_dict = dict()
+    run_split_cols = [
+        "seconds_since_hit_000", "seconds_since_hit_005", "seconds_since_hit_010",
+        "seconds_since_hit_015", "seconds_since_hit_020", "seconds_since_hit_025",
+        "seconds_since_hit_030", "seconds_since_hit_035", "seconds_since_hit_040",
+        "seconds_since_hit_045", "seconds_since_hit_050", "seconds_since_hit_055",
+        "seconds_since_hit_060", "seconds_since_hit_065", "seconds_since_hit_070",
+        "seconds_since_hit_075", "seconds_since_hit_080", "seconds_since_hit_085",
+        "seconds_since_hit_090"
+    ]
 
     # Download runner sprint data from a start year till the current year.
     # Stop while loop before current year for better results
+    sprint_data_dict = dict()
     while year_start < year_today:
-        # Dictionary of pl.LazyFrame
-        year_data = pl.LazyFrame(statcast_sprint_speed(year_start, min_samples))
-        year_data = year_data.with_columns(pl.lit(year_start).alias("year"))
-        year_data = year_data.select(
-            pl.col("player_id"),
-            pl.col("year"),
-            pl.col("sprint_speed")
-        )
-        year_data_dict[year_start] = year_data
+        # Download sprint splits
+        sprint_split_lf = pl.LazyFrame(statcast_running_splits(year_start, min_samples))
+        sprint_split_lf = sprint_split_lf.select(pl.exclude(["last_name, first_name", "name_abbrev", "team_id", "position_name", "age"]))
+        sprint_split_lf = sprint_split_lf.with_columns([pl.col(col).cast(pl.Float64) for col in run_split_cols])
+        sprint_split_lf = sprint_split_lf.with_columns(pl.col("player_id").cast(pl.String))
+        # Download sprint speed
+        sprint_speed_lf = pl.LazyFrame(statcast_sprint_speed(year_start, min_samples))
+        sprint_speed_lf = sprint_speed_lf.select(pl.exclude(["last_name, first_name", "team_id", "team", "position", "age", "competitive_runs"]))
+        sprint_speed_lf = sprint_speed_lf.with_columns(pl.col("player_id").cast(pl.String))
+        # Merge
+        sprint_merge_lf = sprint_speed_lf.join(sprint_split_lf, on=["player_id"], how="left")
+        sprint_merge_lf = sprint_merge_lf.with_columns(pl.lit(year_start).alias("year"))
+        sprint_data_dict[year_start] = sprint_merge_lf
         year_start += 1
     
-    year_data_lazy = pl.LazyFrame()
-    
     # Append each year to the bottom
-    year_data_lazy = pl.concat(year_data_dict.values())
+    sprint_data_lf = pl.concat(sprint_data_dict.values())
     
-    return year_data_lazy
-#%%
+    return sprint_data_lf 
+
 def runner_time_split_data(year_start: int, year_today: int = None, min_samples: int = 50):
     """
     Download runner time split data, the time from home to first base at 5ft intervals,
@@ -64,6 +75,15 @@ def runner_time_split_data(year_start: int, year_today: int = None, min_samples:
     if year_today is None:
         year_today = datetime.now().year
 
+    run_split_cols = [
+        "seconds_since_hit_000", "seconds_since_hit_005", "seconds_since_hit_010",
+        "seconds_since_hit_015", "seconds_since_hit_020", "seconds_since_hit_025",
+        "seconds_since_hit_030", "seconds_since_hit_035", "seconds_since_hit_040",
+        "seconds_since_hit_045", "seconds_since_hit_050", "seconds_since_hit_055",
+        "seconds_since_hit_060", "seconds_since_hit_065", "seconds_since_hit_070",
+        "seconds_since_hit_075", "seconds_since_hit_080", "seconds_since_hit_085",
+        "seconds_since_hit_090"
+    ]
     year_data_dict = dict()
 
     # Download runner sprint data from a start year till the current year.
@@ -79,15 +99,17 @@ def runner_time_split_data(year_start: int, year_today: int = None, min_samples:
         # )
         year_data_dict[year_start] = year_data
         year_start += 1
-    
-    year_data_lazy = pl.LazyFrame()
+
+    # Iterate the over run split columns names
+    for col_name in run_split_cols:
+        year_data = year_data.with_columns(
+            pl.col(col_name).cast(pl.Float64)
+        )
     
     # Append each year to the bottom
     year_data_lazy = pl.concat(year_data_dict.values())
     
     return year_data_lazy
-
-#%%
 
 def sprint_statcast_lazy_merge(statcast_data: pl.LazyFrame, sprint_data: pl.LazyFrame):
     """
@@ -139,10 +161,14 @@ def runner_time_to_home(statcast_data: pl.LazyFrame):
     return time_to_home_lf 
 
 if __name__ == "__main__":
-    # Runner sprint Speed since 2016
-    sprint_lf = runner_sprint_speed_data(2016)
-    print(sprint_lf.collect().head(10))
-
+    sprint_split_lf = pl.LazyFrame(statcast_running_splits(2016))
+    print("\n".join(sprint_split_lf.columns))
+    
+    sprint_speed_lf = pl.LazyFrame(statcast_sprint_speed(2016))
+    print("\n".join(sprint_speed_lf.columns))
+    # Print Columns of any player that has ran at least 50 times.
+    sprint_data_lf = runner_sprint_data(2016).collect().to_pandas()
+    print("\n".join(sprint_data_lf.columns))
     # Replace with game_state_filter once merged with main
     statcast_lf = pl.scan_parquet("../../data/game_state_filter-2016-04-03.parquet")
     print(statcast_lf.collect().head(10))
