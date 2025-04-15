@@ -5,6 +5,8 @@ description = "Estimate the probability that a runner is thrown out at home when
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "ipykernel>=6.29.5",
     "polars>=1.26.0",
     "pybaseball>=2.2.7",
+    "seaborn>=0.13.2",
 ]
