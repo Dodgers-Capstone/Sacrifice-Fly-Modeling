@@ -1,7 +1,7 @@
 from pybaseball import statcast
 import polars as pl
 
-def game_state_filter(start_dt:str, end_dt:str = None):
+def game_state_filter(start_dt: str, end_dt: str = None):
     """
     Download StatCast baseball data from a date range and filter by the game state condition
     where there is 1 out and runners are on 3rd and 2nd base.
@@ -31,11 +31,5 @@ if __name__ == "__main__":
     # Download data since the start of the 2016 season, April 3rd, 2016.
     data_lazy_filter = game_state_filter(start_dt="2016-04-03")
 
-    # Convert pl.LazyFrame to pl.DataFrame
-    data_filter = data_lazy_filter.collect()
-
-    # Write pl.DataFrame to parquet
-    data_filter.write_parquet("../../data/game_state_filter-2016-04-03.parquet")
-
     # Output the head of the pl.DataFrame
-    print(data_filter.head())
+    print(data_filter.select(["outs_when_up", "on_3b", "on_2b", "on_1b"].collect().head())
