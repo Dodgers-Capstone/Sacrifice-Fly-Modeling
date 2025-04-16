@@ -69,7 +69,7 @@ uv add <package_name>
 
 ### Early Discovery Analysis (EDA) and Feature Engineering
 
-- [ ] Game State Filtering
+- [x] Game State Filtering
 - [ ] Fielder Positioning
 - [ ] Fielder Throw Velocity and Accuracy
 - [ ] Runner Acceleration and Velocity
