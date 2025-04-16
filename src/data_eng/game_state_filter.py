@@ -32,4 +32,4 @@ if __name__ == "__main__":
     data_lazy_filter = game_state_filter(start_dt="2016-04-03")
 
     # Output the head of the pl.DataFrame
-    print(data_filter.select(["outs_when_up", "on_3b", "on_2b", "on_1b"].collect().head()))
+    print(data_lazy_filter.select(["outs_when_up", "on_3b", "on_2b", "on_1b"]).collect().head())
