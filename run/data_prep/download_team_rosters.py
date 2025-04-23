@@ -1,3 +1,4 @@
+from pathlib import Path
 import subprocess
 
 def download_team_rosters(get_team_rosters_run_r_path: str):
@@ -13,14 +14,21 @@ def download_team_rosters(get_team_rosters_run_r_path: str):
     """
     subprocess.run(
         ["rscript", get_team_rosters_run_r_path],
-        capture_output=false,
-        check=true,
+        capture_output = False,
+        check = True,
     )
 
 if __name__ == "__main__":
     print("Downloading Team Rosters...")
-    run_dir = os.path.abspath("../../run/data_prep")
-    get_team_rosters_path = os.path.join(run_dir, "get_team_rosters_run.r")
+    # Script Directory Path
+    base_path = Path(__file__).resolve().parent
+    
+    # Run Path
+    run_dir = (base_path / "../../run").resolve()
+    
+    # Rscript path
+    get_team_rosters_path = run_dir / "R/get_team_rosters_run.r"
+
     download_team_rosters(get_team_rosters_run_r_path = get_team_rosters_path)
     print("Downloaded Team Rosters. data was saved to the data directory of the project")
 
