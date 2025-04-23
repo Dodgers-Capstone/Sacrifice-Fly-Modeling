@@ -12,7 +12,7 @@ def game_state_filter(on_base_lf: pl.LazyFrame) -> pl.LazyFrame:
     """
     # Filter for 1 out with runners on third and second
     on_base_filter_lf = on_base_lf.filter(
-        (pl.col("pre_outs") == 1)
+        (pl.col("pre_outs") > 2)
     )
 
     return on_base_filter_lf
