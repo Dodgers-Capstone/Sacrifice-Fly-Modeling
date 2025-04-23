@@ -15,19 +15,27 @@ def pivot_on_fielder(on_base_pl: pl.DataFrame) -> pl.LazyFrame:
     Returns:
         pl.LazyFrame: wider throw_home_runner_on_* data.
     """
-    on_base_pl_cols = set(on_base_pl.columns)
-
-    fielder_values = ["mlb_person_id", "at_pitch_x", "at_pitch_y", "at_zone_x", "at_zone_y",
-                      "at_landing_x", "at_landing_y", "at_fielded_x", "at_fielded_y",
-                      "at_throw_1_x", "at_throw_1_y"]
-
-    fielder_index = list(on_base_pl_cols - set(fielder_values))
-
     # Drop Null Fielder data (Note: Fielder values may still be null)
     on_base_pl = on_base_pl.filter(
         pl.col("pos_id").is_not_null() |
         pl.col("mlb_person_id").is_not_null()
     )
+
+
+    on_base_pl = on_base_pl.with_columns(
+        pl.col("mlb_person_id").cast(pl.Int64),
+    )
+
+    # Get column names
+    on_base_pl_cols = on_base_pl.columns
+
+    # Specify the value columns for pivot
+    fielder_values = ["pos_code", "pos_id", "mlb_person_id", "at_pitch_x", "at_pitch_y",
+                      "at_zone_x", "at_zone_y", "at_landing_x", "at_landing_y", "at_fielded_x",
+                      "at_fielded_y", "at_throw_1_x", "at_throw_1_y"]
+
+    # whatever isnt a value column is a key column. Duplicate Keys will be removed next
+    fielder_index = [col for col in on_base_pl_cols if col not in fielder_values]
 
     # Make a column that converts position id to position names
     on_base_pl = on_base_pl.with_columns(
@@ -40,7 +48,7 @@ def pivot_on_fielder(on_base_pl: pl.DataFrame) -> pl.LazyFrame:
           .alias("pos_label")
     )
 
-    # Pivot wider by position
+    # Pivot wider by position and take the first row of the index
     on_third_wide_pl = on_base_pl.pivot(
         values = fielder_values,
         index = fielder_index,
