@@ -1,6 +1,6 @@
 # Add this section to specify the build system
 [build-system]
-requires = ["setuptools>=61.0"] # Use setuptools as the builder
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,8 +10,8 @@ description = "Estimate the probability that a runner is thrown out at home when
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "ipython>=9.1.0",   # Keeping user-specified version
-    "polars>=1.26.0",  # Keeping user-specified version
+    "ipython>=9.1.0",
+    "polars>=1.26.0",
     "pybaseball>=2.2.7",
 ]
 # Add development dependencies here if needed, e.g., for testing or linting
@@ -20,4 +20,4 @@ dependencies = [
 
 # Add this section to tell setuptools where your package code is
 [tool.setuptools.packages.find]
-where = ["src"]  # Looks for Python packages inside the 'src' directory
+where = ["src"]
