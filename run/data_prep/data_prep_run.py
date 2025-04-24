@@ -96,6 +96,7 @@ sprint_lf.collect().write_csv(sprint_data_csv_path)
 
 print(f"""
 Created Datasets!
+
 Original Dataset:
 {on_second_csv_path}
 {on_third_csv_path}
@@ -112,7 +113,7 @@ Pivoted Wider with Sprint:
 {on_third_wide_sprint_path}
 {on_third_wide_sprint_csv_path}
 
-Pivoted Wider with Sprint and Filtered for 1 Out:
+Pivoted Wider with Sprint and Filtered for less than 2 Outs:
 {on_second_wide_sprint_game_state_filtered_path}
 {on_second_wide_sprint_game_state_filtered_csv_path}
 {on_third_wide_sprint_game_state_filtered_path}

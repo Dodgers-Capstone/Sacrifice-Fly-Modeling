@@ -22,13 +22,15 @@ if __name__ == "__main__":
     print("Downloading Team Rosters...")
     # Script Directory Path
     base_path = Path(__file__).resolve().parent
+    print(base_path)
     
     # Run Path
-    run_dir = (base_path / "../../run").resolve()
+    run_dir = base_path.parent 
+    print(run_dir)
     
     # Rscript path
     get_team_rosters_path = run_dir / "R/get_team_rosters_run.r"
+    print(get_team_rosters_path)
 
     download_team_rosters(get_team_rosters_run_r_path = get_team_rosters_path)
     print("Downloaded Team Rosters. data was saved to the data directory of the project")
-

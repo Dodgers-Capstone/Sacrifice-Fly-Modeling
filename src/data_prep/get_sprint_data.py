@@ -1,4 +1,3 @@
-from pybaseball import statcast_sprint_speed
 from pybaseball import statcast_running_splits
 from datetime import datetime
 import polars as pl
