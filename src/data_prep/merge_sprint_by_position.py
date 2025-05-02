@@ -26,16 +26,16 @@ def merge_sprint_by_position(on_base_lf: pl.LazyFrame,
     # Merge by playerID and year using current year's sprint data
     merged_lf = on_base_lf.join(
         sprint_data_lf,
-        left_on=[position, "year"], # e.g., "batter", "year"
-        right_on=["player_id", "curr_year"], # Join keys from sprint data
+        left_on=[position, "year"],
+        right_on=["player_id", "curr_year"],
         how="left"
     )
 
     # Merge by playerID and year using last year's sprint data
     merged_lf = merged_lf.join(
         sprint_data_lf,
-        left_on=[position, "year"], # e.g., "batter", "year"
-        right_on=["player_id", "prev_year"], # Join keys from sprint data
+        left_on=[position, "year"],
+        right_on=["player_id", "prev_year"],
         how="left",
         suffix="_prev_year"
     )
@@ -61,10 +61,5 @@ def merge_sprint_by_position(on_base_lf: pl.LazyFrame,
     final_cols_to_drop = [c for c in cols_to_drop if c in merged_lf.collect_schema()]
 
     merged_lf = merged_lf.drop(final_cols_to_drop)
-
-
-    # Optional: Rename the 'year' column from the first join if it got a '_right' suffix
-    if 'year_right' in merged_lf.collect_schema() and 'year' not in merged_lf.collect_schema():
-         merged_lf = merged_lf.rename({'year_right': 'year_sprint'}) # Or just drop if not needed
 
     return merged_lf

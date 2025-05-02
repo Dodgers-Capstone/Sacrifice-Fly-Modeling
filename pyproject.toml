@@ -11,8 +11,11 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "ipython>=9.1.0",
+    "matplotlib>=3.10.1",
     "polars>=1.26.0",
     "pybaseball>=2.2.7",
+    "scikit-learn>=1.6.1",
+    "torch>=2.7.0",
 ]
 # Add development dependencies here if needed, e.g., for testing or linting
 # [project.optional-dependencies]
