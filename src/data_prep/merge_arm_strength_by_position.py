@@ -14,7 +14,7 @@ def merge_arm_strength_by_position(on_base_lf: pl.LazyFrame,
         arm_strength_data_lf: (pl.LazyFrame) arm_strength dataset from prep_arm_strength.py
         position: (str) position column name containing the MLB player ID  
     Returns:
-        pl.LazyFrame: Position overall and max arm strength merged with throw_home_runner_on_<base>
+        pl.LazyFrame: Position  overall and max arm strength merged with throw_home_runner_on_<base>
     """
     # Dictionary for renaming arm_strength_data to player position
     rename_dict = dict()
