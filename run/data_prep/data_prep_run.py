@@ -4,6 +4,7 @@ import os
 import glob
 from data_prep import (pivot_on_fielder, game_state_filter, get_sprint_data, 
                        merge_sprint_by_position, prep_arm_strength, merge_arm_strength_by_position)
+from data_eng import fielder_distance
 
 # ==== Data Paths ====
 # Script Directory Path
@@ -93,6 +94,11 @@ for on_base_path in on_base_paths:
     on_base_lf = merge_arm_strength_by_position(on_base_lf = on_base_lf,
                                    arm_strength_data_lf = arm_lf,
                                    position = "fielder_mlb_person_id")
+
+    # Get fielder coordinates, fielder distance to home plate, fielder distance travled to catch
+    on_base_lf = fielder_distance(on_base_lf = on_base_lf,
+                                  home_coord_x = 0.0,
+                                  home_coord_y = 0.0)
 
     print(f"Merged arm strength data for runner on {base} by fielder features")
     # print("\n".join(on_base_pl.collect_schema()))
