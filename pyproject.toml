@@ -15,6 +15,7 @@ dependencies = [
     "polars>=1.26.0",
     "pybaseball>=2.2.7",
     "scikit-learn>=1.6.1",
+    "seaborn>=0.13.2",
     "torch>=2.7.0",
 ]
 # Add development dependencies here if needed, e.g., for testing or linting
@@ -24,3 +25,8 @@ dependencies = [
 # Add this section to tell setuptools where your package code is
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+]
