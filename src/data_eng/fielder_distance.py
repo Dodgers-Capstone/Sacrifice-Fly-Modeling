@@ -78,4 +78,11 @@ def fielder_distance(
     ).alias("distance_traveled_all_fielders")
   )
 
+  # Fielder distance to home difference when batted to catch
+  on_base_lf = on_base_lf.with_columns((
+    (pl.col("at_fielded_x_fielder").pow(2) + pl.col("at_fielded_y_fielder").pow(2)).sqrt() -
+    (pl.col("at_zone_x_fielder").pow(2) + pl.col("at_zone_y_fielder").pow(2)).sqrt()
+    ).alias("distance_to_home_diff")
+  )
+
   return on_base_lf
