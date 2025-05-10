@@ -3,7 +3,8 @@ from pathlib import Path
 import os
 import glob
 from data_prep import (pivot_on_fielder, game_state_filter, get_sprint_data, 
-                       merge_sprint_by_position, prep_arm_strength, merge_arm_strength_by_position)
+                       merge_sprint_by_position, prep_arm_strength, merge_arm_strength_by_position,
+                       create_is_successful)
 from data_eng import fielder_distance
 
 # ==== Data Paths ====
@@ -102,6 +103,10 @@ for on_base_path in on_base_paths:
 
     print(f"Merged arm strength data for runner on {base} by fielder features")
     # print("\n".join(on_base_pl.collect_schema()))
+
+    # Create target feature
+    on_base_lf = create_is_successful(on_base_lf)
+    print("Created Target Feature Successful Sac Fly")
 
     # Save engineered on_base data as parquet and csv
     mod_file_name = f"throw_home_runner_on_{base}_wide_sprint_arm"
