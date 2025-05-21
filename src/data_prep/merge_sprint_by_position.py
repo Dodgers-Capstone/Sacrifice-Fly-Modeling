@@ -13,6 +13,7 @@ def merge_sprint_by_position(on_base_lf: pl.LazyFrame, sprint_data_lf: pl.LazyFr
   Returns:
       merged_lazy (pl.LazyFrame): Sprint data left merged on Statcast data
   """
+  sprint_data_lf = sprint_data_lf.unique(subset=["player_id", "curr_year", "prev_year"])
   # Dictionary for renaming sprint data to player postion
   col_names_ex_suffix = ["player_id", "curr_year", "prev_year"]
   col_names_to_suffix = [
