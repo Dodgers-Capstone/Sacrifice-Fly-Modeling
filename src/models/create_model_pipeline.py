@@ -119,9 +119,12 @@ def create_model_pipeline(
         ("oversampler", oversampler),
         ("classifier", base_model)
     ])
+
+    # For param_grid, start with classifier__{parameter} as the name.
+    step = "classifier"
+    param_grid = {f"{step}__{key}":val for key, val in param_grid.items()}
     
     # Wrap pipeline in a Gridsearch. Each CV set will have its own pipeline.
-    # For param_grid, start with classifier__{parameter} as the name.
     grid_search = GridSearchCV(
         estimator=pipeline,
         param_grid=param_grid,
@@ -157,7 +160,6 @@ def create_model_pipeline(
     
     if verbose:
         print(f"\nDataset shape after drop imputation: {X.shape}")
-        print(f"Response distribution: {y.value_counts().to_dict()}")
     
     # Split the predictor and response sets into train and test sets
     X_train, X_test, y_train, y_test = train_test_split(
