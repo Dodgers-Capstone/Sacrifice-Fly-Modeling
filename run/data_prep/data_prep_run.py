@@ -1,125 +1,104 @@
-from data_prep import pivot_on_fielder, game_state_filter, get_sprint_data, merge_sprint_by_position
 import polars as pl
 from pathlib import Path
 import os
+import glob
+from data_prep import (pivot_on_fielder, game_state_filter, get_sprint_data, 
+                       merge_sprint_by_position, prep_arm_strength, merge_arm_strength_by_position)
 
 # ==== Data Paths ====
 # Script Directory Path
-base_path = Path(__file__).resolve().parent
+pos_dict = {"third": "mlb_person_id_R3", "second": "mlb_person_id_R2", "first":"mlb_person_id_R1"}
 
-# Data Path
-data_dir = (base_path / "../../data").resolve()
+file_path = os.path.dirname(__file__)
+project_path = os.path.abspath(os.path.join(file_path, "../../"))
+data_path = os.path.join(project_path, "data")
 
-# Data Read Paths
-on_second_path = data_dir / "throw_home_runner_on_second.parquet"
-on_third_path = data_dir / "throw_home_runner_on_third.parquet"
-
-# Data Write Paths
-on_second_csv_path = data_dir / "throw_home_runner_on_second.csv"
-on_third_csv_path = data_dir / "throw_home_runner_on_third.csv"
-
-on_second_wide_path = data_dir / "throw_home_runner_on_second_wide.parquet"
-on_third_wide_path = data_dir / "throw_home_runner_on_third_wide.parquet"
-on_second_wide_csv_path = data_dir / "throw_home_runner_on_second_wide.csv"
-on_third_wide_csv_path = data_dir / "throw_home_runner_on_third_wide.csv"
-
-on_second_wide_sprint_path = data_dir / "throw_home_runner_on_second_wide_sprint.parquet"
-on_third_wide_sprint_path = data_dir / "throw_home_runner_on_third_wide_sprint.parquet"
-on_second_wide_sprint_csv_path = data_dir / "throw_home_runner_on_second_wide_sprint.csv"
-on_third_wide_sprint_csv_path = data_dir / "throw_home_runner_on_third_wide_sprint.csv"
-
-on_second_wide_sprint_game_state_filtered_path = data_dir / "throw_home_runner_on_second_wide_sprint_game_state_filtered.parquet"
-on_third_wide_sprint_game_state_filtered_path = data_dir / "throw_home_runner_on_third_wide_sprint_game_state_filtered.parquet"
-on_second_wide_sprint_game_state_filtered_csv_path = data_dir / "throw_home_runner_on_second_wide_sprint_game_state_filtered.csv"
-on_third_wide_sprint_game_state_filtered_csv_path = data_dir / "throw_home_runner_on_third_wide_sprint_game_state_filtered.csv"
-
-sprint_data_path = data_dir / "sprint_data.parquet"
-sprint_data_csv_path = data_dir / "sprint_data.csv"
-
-# ==== Import/Get Data ====
-on_second_pl = pl.read_parquet(on_second_path)
-on_third_pl = pl.read_parquet(on_third_path)
-
-# ==== Prep the data ====
-# Name Correction for on_third_pl
-on_third_pl = on_third_pl.with_columns(
-    pl.col("runner_name").str.replace_all("Manny Pina", "Manny Piña").alias("runner_name"),
-    pl.col("fielder_name").str.replace_all("Manny Pina", "Manny Piña").alias("fielder_name")
-)
-
-# Name Correction for on_second_pl
-on_second_pl = on_second_pl.with_columns(
-    pl.col("runner_name").str.replace_all("Manny Pina", "Manny Piña").alias("runner_name"),
-    pl.col("fielder_name").str.replace_all("Manny Pina", "Manny Piña").alias("fielder_name")
-)
+# Get available running datasets
+on_base_paths = []
+for base in pos_dict.keys():
+    on_base_path = os.path.join(data_path, f"throw_home_runner_on_{base}.parquet")   
+    if os.path.exists(on_base_path):
+        on_base_paths.append(on_base_path)
 
 
-# Pivot wider on fielder position
-on_second_wide_lf = pivot_on_fielder(on_second_pl)
-on_third_wide_lf = pivot_on_fielder(on_third_pl)
+# Get available arm_strength datasets
+arm_strength_paths = glob.glob(os.path.join(data_path, "arm_strength_*.csv"))
 
-# Add sprint data
+# Check if path lists are empty
+if not on_base_paths:
+    raise ValueError(f"throw_home_runner_on_<base>.parquet files not found at: {data_path}")
+
+if not arm_strength_paths:
+    raise ValueError(f"arm_strenth_<year>.csv not found at: {data_path}")
+
+# ==== Download and Prepare Supplimental Data, Sprint and Arm Stength ====
+
 sprint_lf = get_sprint_data(year_start = 2020)
-on_second_wide_sprint_lf = merge_sprint_by_position(on_base_lf = on_second_wide_lf,
-                                                    sprint_data_lf = sprint_lf,
-                                                    position = "mlb_person_id_R2")
+arm_lf = prep_arm_strength(arm_strength_paths)
+# print("\n".join(arm_lf.collect_schema()))
 
-on_third_wide_sprint_lf = merge_sprint_by_position(on_base_lf = on_third_wide_lf,
-                                                   sprint_data_lf = sprint_lf,
-                                                   position = "mlb_person_id_R3")
+# ==== Prepare on_base data ====
 
-# Filter by game state
-on_second_wide_sprint_game_state_filted_lf = game_state_filter(on_second_wide_sprint_lf) 
-on_thrid_wide_sprint_game_state_filted_lf = game_state_filter(on_third_wide_sprint_lf) 
+on_base_lf_list = list()
 
-# ==== Write Data ====
-on_second_pl.write_csv(on_second_csv_path)
-on_third_pl.write_csv(on_third_csv_path)
+for on_base_path in on_base_paths:
+    # Get base of interest from file name
+    file_name = os.path.basename(on_base_path)
+    base = str(file_name.split("_")[-1].split(".")[0])
+    print(f"Processing runner on {base} data at: {on_base_path}")
 
-on_second_wide_lf.collect().write_parquet(on_second_wide_path)
-on_second_wide_lf.collect().write_csv(on_second_wide_csv_path)
-on_third_wide_lf.collect().write_csv(on_third_wide_csv_path)
-on_third_wide_lf.collect().write_parquet(on_third_wide_path)
+    # Read in on_base data
+    on_base_pl = pl.read_parquet(on_base_path)
+    # print("\n".join(on_base_pl.collect_schema()))
 
-on_second_wide_sprint_lf.collect().write_parquet(on_second_wide_sprint_path)
-on_second_wide_sprint_lf.collect().write_csv(on_second_wide_sprint_csv_path)
-on_third_wide_sprint_lf.collect().write_csv(on_third_wide_sprint_csv_path)
-on_third_wide_sprint_lf.collect().write_parquet(on_third_wide_sprint_path)
+    # Pivot fielder features wider
+    on_base_lf = pivot_on_fielder(on_base_pl)
+    print(f"Widened runner on {base} by fielder features")
+    # print("\n".join(on_base_pl.collect_schema()))
 
-on_second_wide_sprint_game_state_filted_lf.collect().write_parquet(on_second_wide_sprint_game_state_filtered_path)
-on_second_wide_sprint_game_state_filted_lf.collect().write_csv(on_second_wide_sprint_game_state_filtered_csv_path)
-on_thrid_wide_sprint_game_state_filted_lf.collect().write_csv(on_third_wide_sprint_game_state_filtered_csv_path)
-on_thrid_wide_sprint_game_state_filted_lf.collect().write_parquet(on_third_wide_sprint_game_state_filtered_path)
+    # Filter for less than 2 outs
+    on_base_lf = game_state_filter(on_base_lf)
+    print(f"Filtered runner on {base} data for plays with less than one out")
 
-sprint_lf.collect().write_parquet(sprint_data_path)
-sprint_lf.collect().write_csv(sprint_data_csv_path)
+    # Correct Manny Pina's name to match Statcast
+    on_base_lf = on_base_lf.with_columns(
+        pl.col("runner_name").str.replace_all("Manny Pina", "Manny Piña").alias("runner_name"),
+        pl.col("fielder_name").str.replace_all("Manny Pina", "Manny Piña").alias("fielder_name")
+    )
 
-print(f"""
-Created Datasets!
+    # Get runner of interest player_id column name
+    position = pos_dict[base]
 
-Original Dataset:
-{on_second_csv_path}
-{on_third_csv_path}
+    # Merge Sprint data for the runner of intereest
+    on_base_lf = merge_sprint_by_position(on_base_lf = on_base_lf,
+                                          sprint_data_lf = sprint_lf,
+                                          position = position)
 
-Pivoted Wider Dataset:
-{on_second_wide_path}
-{on_second_wide_csv_path}
-{on_third_wide_path}
-{on_third_wide_csv_path}
+    print(f"Merged Sprint data for runner on {base} by fielder features")
+    # print("\n".join(on_base_pl.collect_schema()))
 
-Pivoted Wider with Sprint:
-{on_second_wide_sprint_path}
-{on_second_wide_sprint_csv_path}
-{on_third_wide_sprint_path}
-{on_third_wide_sprint_csv_path}
+    # Merge arm strengths of all out fielders and the out fielder that caught the ball
+    on_base_lf = merge_arm_strength_by_position(on_base_lf = on_base_lf,
+                                   arm_strength_data_lf = arm_lf,
+                                   position = "mlb_person_id_LF")
 
-Pivoted Wider with Sprint and Filtered for less than 2 Outs:
-{on_second_wide_sprint_game_state_filtered_path}
-{on_second_wide_sprint_game_state_filtered_csv_path}
-{on_third_wide_sprint_game_state_filtered_path}
-{on_third_wide_sprint_game_state_filtered_csv_path}
+    on_base_lf = merge_arm_strength_by_position(on_base_lf = on_base_lf,
+                                   arm_strength_data_lf = arm_lf,
+                                   position = "mlb_person_id_CF")
 
-Sprint Dataset:
-{sprint_data_path}
-{sprint_data_csv_path}
-""")
+    on_base_lf = merge_arm_strength_by_position(on_base_lf = on_base_lf,
+                                   arm_strength_data_lf = arm_lf,
+                                   position = "mlb_person_id_RF")
+
+    on_base_lf = merge_arm_strength_by_position(on_base_lf = on_base_lf,
+                                   arm_strength_data_lf = arm_lf,
+                                   position = "fielder_mlb_person_id")
+
+    print(f"Merged arm strength data for runner on {base} by fielder features")
+    # print("\n".join(on_base_pl.collect_schema()))
+
+    # Save engineered on_base data as parquet and csv
+    mod_file_name = f"throw_home_runner_on_{base}_wide_sprint_arm"
+    on_base_lf.collect().write_parquet(os.path.join(data_path, f"{mod_file_name}.parquet"))
+    on_base_lf.collect().write_csv(os.path.join(data_path, f"{mod_file_name}.csv"))
+    print(f"Saved data to: {data_path}")
