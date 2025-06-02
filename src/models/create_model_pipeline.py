@@ -244,7 +244,7 @@ def model_prep_on_base(
     X_test = test_set.select(all_predictors).to_pandas()
     y_train = train_set.select(responses).to_pandas().squeeze()
     y_test = test_set .select(responses).to_pandas().squeeze()
-    y_train.isna
+
     # Train the model
     grid_search.fit(X_train, y_train)
     
@@ -282,21 +282,3 @@ def model_prep_on_base(
     }
     
     return results
-
-
-# def create_model_pipeline(
-#     on_base_lf: pl.LazyFrame,
-#     responses: List[str],
-#     cat_predictors_drop: List[str] = [],
-#     cat_predictors_mode: List[str] = [],
-#     num_predictors_drop: List[str] = [],
-#     num_predictors_median: List[str] = [],
-#     model_type: str = "LogisticRegression",
-#     oversampling_method: str = "SMOTE",
-#     param_grid: Optional[Dict] = None,
-#     scoring: Dict = {'brier_score': 'neg_brier_score'},
-#     refit: str = "brier_score",
-#     cv: int = 5,
-#     test_size: float = 0.30,
-#     random_state: int = 123,
-#     verbose: bool = True):
