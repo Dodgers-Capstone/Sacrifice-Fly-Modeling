@@ -9,7 +9,7 @@ from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report, brier_score_loss
+from sklearn.metrics import classification_report, brier_score_loss, log_loss
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split, GridSearchCV
 
@@ -259,11 +259,13 @@ def model_prep_on_base(
     y_pred_proba = best_pipeline.predict_proba(X_test)[:, 1]
     
     # Calculate metrics
-    brier_score = brier_score_loss(y_test, y_pred_proba)
+    pred_brier_score = brier_score_loss(y_test, y_pred_proba)
+    pred_log_loss = log_loss(y_test, y_pred_proba)
     
     if verbose:
         print(classification_report(y_test, y_pred))
-        print(f"Brier Score: {brier_score:.4f}")
+        print(f"Brier Score: {pred_brier_score:.4f}")
+        print(f"log loss: {pred_log_loss:.4f}")
         print(f"\nPredictors:\n{"\n".join(all_predictors)}")
         print(f"\nResponse:\n{"\n".join(responses)}")
     
@@ -276,7 +278,8 @@ def model_prep_on_base(
         'y_test': y_test,
         'y_pred': y_pred,
         'y_pred_proba': y_pred_proba,
-        'brier_score': brier_score,
+        'brier_score': pred_brier_score,
+        'log_loss': pred_log_loss,
         'feature_names': all_predictors,
         'response_names': responses
     }
