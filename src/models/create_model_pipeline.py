@@ -205,7 +205,7 @@ def model_prep_on_base(
     if (is_out_censored) and ("is_out" in responses):
         train_set = train_set.with_columns(
             pl.when((pl.col("is_stay") == True) & 
-                    (pl.col("distance_catch_to_home") <= 260))
+                    (pl.col("distance_catch_to_home") <= 265))
               .then(True)
               .otherwise(pl.col("is_out"))
               .alias("is_out")
@@ -222,7 +222,7 @@ def model_prep_on_base(
     elif (test_stay_to_out_threshold) and ("is_out" in responses) and (test_stay_to_out == False):
         test_set = test_set.with_columns(
             pl.when((pl.col("is_stay") == True) & 
-                    (pl.col("distance_catch_to_home") <= 260))
+                    (pl.col("distance_catch_to_home") <= 265))
               .then(True)
               .otherwise(pl.col("is_out"))
               .alias("is_out")
