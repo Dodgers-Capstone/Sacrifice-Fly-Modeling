@@ -250,7 +250,8 @@ def model_prep_on_base(
     
     if verbose:
         best_param = [f"{param} = {value}" for param, value in grid_search.best_params_.items()]
-        print(f"\nBest parameters: \n{"\n".join(best_param)}")
+        param_list = "\n".join(best_param)
+        print(f"\nBest parameters: \n{param_list}")
         print(f"\nBest cross-validation score: {grid_search.best_score_:.4f}\n")
     
     # ==== Model Evaluation ====
@@ -266,8 +267,10 @@ def model_prep_on_base(
         print(classification_report(y_test, y_pred))
         print(f"Brier Score: {pred_brier_score:.4f}")
         print(f"log loss: {pred_log_loss:.4f}")
-        print(f"\nPredictors:\n{"\n".join(all_predictors)}")
-        print(f"\nResponse:\n{"\n".join(responses)}")
+        pred_list = "\n".join(all_predictors)
+        resp_list = "\n".join(responses)
+        print(f"\nPredictors:\n{pred_list}")
+        print(f"\nResponse:\n{resp_list}")
     
     # Return important objects
     results = {
