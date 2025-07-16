@@ -7,25 +7,6 @@
 1. Estimate the probability that a runner is thrown out at home when runners are on 2nd and 3rd.
 2. Two targets may be favorable P(attempt) and P(success | attempt)
 
-## Deliverables
-
-- [ ] Model performance metrics (meanSquared error, or calculated brier score)
-- [ ] Feature importance with high levels of explainability
-- [ ] Model Calibration
-- [ ] Outfielder position recommendation
-- [ ] Webapp demonstration
-
-## Potential Extentions
-
-- [ ] Evaluate 3rd base coach decisions
-- [ ] Evaluate runner talent based on opportunities
-- [ ] Evaluate fielder talent based on opportunities
-
-## Major Milestones
-
-- [ ] Data Early Discovery Analysis (EDA) and feature engineering
-- [ ] Completed and tested model to Estimate the probability that a runner is thrown out at home when runners are on 2nd and 3rd.
-- [ ] Model Product Visualization and webapp completion
 
 ## Installation and Setup
 
@@ -64,34 +45,6 @@ uv sync
 # add python packages to the project. Replace <package_name> with the package name you wish to add.
 uv add <package_name>
 ```
-
-## Feature Development Pipeline
-
-### Early Discovery Analysis (EDA) and Feature Engineering
-
-- [x] Game State Filtering
-- [ ] Fielder Positioning
-- [ ] Fielder Throw Velocity and Accuracy
-- [x] Runner Acceleration and Velocity
-- [ ] Coordinates of Caught Ball
-- [ ] Fielder who Caught Ball
-- [ ] Field Normalization
-- [ ] Ball Airtime Calculation
-
-### Model Development and Testing
-
-- [ ] Input Features
-- [ ] Output Features
-- [ ] Embedding Pipeline
-- [ ] Model Calibration
-- [ ] Model Validation Results
-
-### Model Product Visualization and Web Application Completion
-
-- [ ] Available Web-app Input Variables and Reasoning
-- [ ] Available Web-app Output Variables and Reasoning
-- [ ] Output Variable Visualization and Reasoning
-- [ ] UI Development and Use Documentation
 
 ---
 
